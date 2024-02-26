@@ -297,9 +297,9 @@ def run_single_image(args):
         return result_dict
 
 if __name__=='__main__':
-    input_file = r"G:\My Drive\DataScience\physionet2024\dataset\ptb-xl\records100\00000\00001_lr.dat"
-    header_file = r"G:\My Drive\DataScience\physionet2024\dataset\ptb-xl\records100\00000\00001_lr.hea"
-    os.chdir(r"C:\Users\sricharan\Projects\DataScience\physionet2024\ecg-image-kit\codes\ecg-image-generator")
+    input_file = r"C:\Users\M310695\OneDrive - Mayo Clinic\DataScience\physionet2024\ptb-xl-a-large-publicly-available-electrocardiography-dataset-1.0.3\records100\01000\01000_lr.dat"
+    header_file = r"C:\Users\M310695\OneDrive - Mayo Clinic\DataScience\physionet2024\ptb-xl-a-large-publicly-available-electrocardiography-dataset-1.0.3\records100\01000\01000_lr.hea"
+    os.chdir(r"C:\Users\M310695\OneDrive - Mayo Clinic\DataScience\physionet2024\ecg-image-kit\codes\ecg-image-generator")
     args = {
         'input_file':input_file,
         'header_file':header_file,
@@ -308,7 +308,7 @@ if __name__=='__main__':
         'pad_inches':1,
         'random_padding':True,
         'deterministic_lead':'II',
-        'random_dc':0.6,
+        'random_dc':1,
         'random_bw':0,
         'random_grid_present':1,
         'print_header':False,
@@ -317,11 +317,11 @@ if __name__=='__main__':
         'standard_grid_color':5,
         'start_index':0,
         'store_config':False,
-        'full_mode':'II',
+        'full_mode':['II','V1'],
         'seed':20,
         'num_columns':-1,
-        'fully_random':True,
-        'hw_text':True,
+        'fully_random':False,
+        'hw_text':False,
         'wrinkles':True,
         'augment':True,
         'num_words':20,
@@ -344,4 +344,7 @@ if __name__=='__main__':
         'handwriting_size_factor':0.2
         }
     out_dict = run_single_image(args)
-    
+    import cv2
+    cv2.imshow("output",cv2.cvtColor(out_dict['image'],cv2.COLOR_RGB2BGR))
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
