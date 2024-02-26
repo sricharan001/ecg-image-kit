@@ -7,6 +7,7 @@ from math import ceil
 import wfdb
 from imgaug import augmenters as iaa
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
+import io
 
 def find_records(folder, output_dir):
     header_files = list()

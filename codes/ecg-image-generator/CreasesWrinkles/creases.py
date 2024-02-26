@@ -246,8 +246,8 @@ def getCoords(angle,n,hh,ww):
     return coords1,coords2
 
 #Main fnction to apply wrinkles and creases
-def get_creased(input_file,output_directory,ifWrinkles=False,ifCreases=False,crease_angle=0,num_creases_vertically=3,num_creases_horizontally=2,bbox=False):
-    filename = input_file
+def get_creased(image,ifWrinkles=False,ifCreases=False,crease_angle=0,num_creases_vertically=3,num_creases_horizontally=2,bbox=False):
+    
 
     if(ifWrinkles):
     #Seed with a different selection of a wrinkle image
@@ -257,8 +257,8 @@ def get_creased(input_file,output_directory,ifWrinkles=False,ifCreases=False,cre
         wrinklesImg=cv2.cvtColor(wrinklesImg, cv2.COLOR_BGR2GRAY)
         wrinklesImg = wrinklesImg.astype("float32") / 255.0
 
-    img_path = filename
-    img = cv2.imread(img_path).astype("float32") / 255.0
+    
+    img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR).astype("float32") / 255.0
     
     hh, ww = img.shape[:2]
 
@@ -336,9 +336,6 @@ def get_creased(input_file,output_directory,ifWrinkles=False,ifCreases=False,cre
         img = low*thresh_inv + high*thresh
 
     img = ( 255 * img ).clip(0, 255).astype(np.uint8)
-   
-    # save results
-    cv2.imwrite(filename, img)
-    
-    return filename
+       
+    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     

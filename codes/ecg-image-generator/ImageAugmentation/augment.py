@@ -28,28 +28,23 @@ def get_parser():
     return parser
 
 # Main function for running augmentations
-def get_augment(input_file,output_directory,rotate=25,noise=25,crop=0.01,temperature=6500,bbox=False, store_text_bounding_box=False):
-    filename = input_file
-    image = Image.open(filename)
-    
-    image = np.array(image)
-    
+def get_augment(image,rotate=25,noise=25,crop=0.01,temperature=6500,bbox=False, store_text_bounding_box=False):
+      
     lead_bbs = []
     leadNames_bbs = []
     
     if bbox:
-        head, tail = os.path.split(filename)
-        f, extn = os.path.splitext(tail)
-        txt_file = os.path.join(head, 'lead_bounding_box', f + '.txt')
-        lead_bbs = read_bounding_box_txt(txt_file)
+        for lead,cords in bbox.items():
+            xmin,ymin,xmax,ymax = [float(i) for i in cords]
+            box = BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax, label=lead)
+            lead_bbs.append(box)        
         lead_bbs = BoundingBoxesOnImage(lead_bbs, shape=image.shape)
 
     if store_text_bounding_box:
-        
-        head, tail = os.path.split(filename)
-        f, extn = os.path.splitext(tail)
-        txt_file = os.path.join(head, 'text_bounding_box', f + '.txt')
-        leadNames_bbs = read_bounding_box_txt(txt_file)
+        for lead,cords in store_text_bounding_box.items():
+            xmin,ymin,xmax,ymax = [float(i) for i in cords]
+            box = BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax, label=lead)
+            leadNames_bbs.append(box)         
         leadNames_bbs = BoundingBoxesOnImage(leadNames_bbs, shape=image.shape)
        
     
@@ -77,22 +72,22 @@ def get_augment(input_file,output_directory,rotate=25,noise=25,crop=0.01,tempera
     if store_text_bounding_box:
         temp, augmented_leadName_bbs = seq_bbox(images=images, bounding_boxes=leadNames_bbs)
 
-    head, tail = os.path.split(filename)
-
-    f = os.path.join(output_directory,tail)
-    plt.imsave(fname=f,arr=images_aug[0])
+    
+    return_dict = {'image' : images_aug[0]}    
     
     if bbox:
-        head, tail = os.path.split(filename)
-        f, extn = os.path.splitext(tail)
-        txt_file = os.path.join(head, 'lead_bounding_box', f + '.txt')
-        write_bounding_box_txt(augmented_lead_bbs, txt_file)
+        out_bbox = {}
+        for box in augmented_lead_bbs:
+            xmin,ymin,xmax,ymax = box.x1,box.y1,box.x2,box.y2
+            out_bbox[box.label] = [xmin,ymin,xmax,ymax]
+        return_dict['lead_bbox'] = (out_bbox)
 
     if store_text_bounding_box:
-        head, tail = os.path.split(filename)
-        f, extn = os.path.splitext(tail)
-        txt_file = os.path.join(head, 'text_bounding_box', f + '.txt')
-        write_bounding_box_txt(augmented_leadName_bbs, txt_file)
+        out_text_bbox = {}
+        for box in augmented_lead_bbs:
+            xmin,ymin,xmax,ymax = box.x1,box.y1,box.x2,box.y2
+            out_text_bbox[box.label] = [xmin,ymin,xmax,ymax]
+        return_dict['text_bbox'] = (out_text_bbox)
 
-    return f
+    return return_dict
 

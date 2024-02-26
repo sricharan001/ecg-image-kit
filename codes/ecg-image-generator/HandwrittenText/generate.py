@@ -20,6 +20,7 @@ import random
 import cv2
 import sys
 import time
+import io
 
 def get_parser():
     description = 'Create a corpus for medical corpus'
@@ -42,6 +43,15 @@ def get_parser():
     parser.add_argument('--save', dest='save', type=str, default=None)
     
     return parser
+
+def plt_to_numpy(fig):
+    io_buf = io.BytesIO()
+    fig.savefig(io_buf, format='raw')
+    io_buf.seek(0)
+    img = np.reshape(np.frombuffer(io_buf.getvalue(), dtype=np.uint8),
+                     newshape=(int(fig.bbox.bounds[3]), int(fig.bbox.bounds[2]), -1))
+    io_buf.close()
+    return (img)
 
 
 #Sample random from a multivariate normal
@@ -139,10 +149,9 @@ def sample_text(sess, args_text, translation, force,bias,style=None):
     return phi_data, window_data, kappa_data, stroke_data, coords
 
 #Main function to add handwritten text to ecg
-def get_handwritten(link,num_words,input_file,output_dir,x_offset=0,y_offset=0,handwriting_size_factor=0.2,model_path=os.path.join(os.path.join('HandwrittenText','pretrained'), 'model-29'),text=None,style=None,bias=1.,force=False,animation=False,noinfo=True,save=None,bbox= False):
+def get_handwritten(image,link,num_words,x_offset=0,y_offset=0,handwriting_size_factor=0.2,model_path=os.path.join(os.path.join('HandwrittenText','pretrained'), 'model-29'),text=None,style=None,bias=1.,force=False,animation=False,noinfo=True,save=None,bbox= False):
     #Use 'Agg' mode to prevent accumulation of figures
     matplotlib.use("Agg")
-    filename = input_file
     
     #Extract n medical terms
     if(validators.url(link)):
@@ -188,8 +197,8 @@ def get_handwritten(link,num_words,input_file,output_dir,x_offset=0,y_offset=0,h
     config = tf.compat.v1.ConfigProto(
         device_count={'GPU': 0}
     )
-    #Create session 
-    with tf.compat.v1.Session(config=config) as sess:
+    #Create session #config=config
+    with tf.compat.v1.Session() as sess:
         saver = tf.compat.v1.train.import_meta_graph(model_path + '.meta')
         saver.restore(sess, model_path)
         #Generate n handwritten words from the selected words
@@ -220,17 +229,15 @@ def get_handwritten(link,num_words,input_file,output_dir,x_offset=0,y_offset=0,h
             ax[i].set_axis_off()
             i=i+1
             #Save the plot as HandwrittenText.png
-        fig.savefig('HandwrittenText.png',dpi=1200)
-        img_path = filename
-        file_head,file_tail = os.path.splitext(filename)
-        boxed_file = file_head + '-boxed' + file_tail
+        image_handwritten = plt_to_numpy(fig)
+              
                 
         #Load the ecg image
-        img_ecg = Image.open(img_path)
+        img_ecg = image
         #Convert from RGBA to RGB
         img_ecg = img_ecg.convert('RGB')
         #Load the generated handwritten text image
-        img_handwritten = Image.open('HandwrittenText.png')
+        img_handwritten = image_handwritten
         #Convert the generated handwritten text image to RGB
         img_handwritten = img_handwritten.convert('RGB')
         #Resize the handwritten text image
@@ -252,15 +259,13 @@ def get_handwritten(link,num_words,input_file,output_dir,x_offset=0,y_offset=0,h
         img_ecg[x_offset:img_handwritten.shape[0]+x_offset,y_offset:img_handwritten.shape[1]+y_offset,:img_handwritten.shape[2]] = img_cropped
         #Save final image
         img_final = Image.fromarray(img_ecg)
-        head, tail = os.path.split(filename)
-        img_final.save(os.path.join(output_dir,tail))
+        
 
         #Load the ecg image
         plt.close('all')
         plt.close(fig)
         plt.clf()
-        plt.cla()
+        plt.cla()   
         
-        os.remove('HandwrittenText.png')
-        outfile = os.path.join(output_dir,tail)
-        return outfile
+        
+        return img_final
