@@ -10,6 +10,7 @@ from CreasesWrinkles.creases import get_creased
 from ImageAugmentation.augment import get_augment
 import warnings
 
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
 warnings.filterwarnings("ignore")
 
@@ -293,55 +294,16 @@ def run_single_image(args):
                 temp = random.choice(range(10000,20000))
         
             result_dict = get_augment(image,rotate=args['rotate'],noise=noise,crop=crop,temperature=temp,bbox = result_dict['lead_bbox'], store_text_bounding_box = result_dict['text_bbox'])
-       
+            result_dict['record_id'] = os.path.split(filename)[1].split('.')[0]
         return result_dict
 
 if __name__=='__main__':
-    input_file = r"G:\My Drive\DataScience\physionet2024\dataset\ptb-xl\records100\00000\00001_lr.dat"
-    header_file = r"G:\My Drive\DataScience\physionet2024\dataset\ptb-xl\records100\00000\00001_lr.hea"
-    os.chdir(r"C:\Users\sricharan\Projects\DataScience\physionet2024\ecg-image-kit\codes\ecg-image-generator")
-    args = {
-        'input_file':input_file,
-        'header_file':header_file,
-        'resolution':100,
-        'random_resolution':False,
-        'pad_inches':1,
-        'random_padding':True,
-        'deterministic_lead':'II',
-        'random_dc':0.6,
-        'random_bw':0,
-        'random_grid_present':1,
-        'print_header':False,
-        'random_add_header':0.8,
-        'random_grid_color':False,
-        'standard_grid_color':5,
-        'start_index':0,
-        'store_config':False,
-        'full_mode':'II',
-        'seed':20,
-        'num_columns':-1,
-        'fully_random':True,
-        'hw_text':True,
-        'wrinkles':True,
-        'augment':True,
-        'num_words':20,
-        'x_offset':1,
-        'y_offset':1,
-        'deterministic_num_words':False,
-        'deterministic_offset':False,
-        'link':'',
-        'crease_angle':45,
-        'deterministic_angle':False,
-        'num_creases_vertically':5,
-        'num_creases_horizontally':2,
-        'deterministic_vertical':False,
-        'deterministic_horizontal':False,
-        'deterministic_noise':False,
-        'noise':25,
-        'bbox':True,
-        'crop':0,
-        'rotate':25,
-        'handwriting_size_factor':0.2
-        }
-    out_dict = run_single_image(args)
-    
+    from Dataset_Utils.physionet_dataset import *
+    input_file =r"G:\My Drive\DataScience\physionet2024\dataset\ptb-xl\records100\06000\06001_lr.dat"
+    header_file = r"G:\My Drive\DataScience\physionet2024\dataset\ptb-xl\records100\06000\06001_lr.hea"
+    with open("config.json",'r') as f:
+        args = json.load(f)
+    args['input_file'] = input_file
+    args['header_file'] = header_file
+    result_dict = run_single_image(args)
+    record = physionet_record(img_arr = result_dict['image'], label_dict = {'leads':result_dict['lead_bbox'],'text':result_dict['text_bbox']})
