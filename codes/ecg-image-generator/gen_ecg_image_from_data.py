@@ -295,7 +295,7 @@ def run_single_image(args):
                 temp = random.choice(range(10000,20000))
         
             result_dict = get_augment(image,rotate=args['rotate'],noise=noise,crop=crop,temperature=temp,bbox = result_dict['lead_bbox'], store_text_bounding_box = result_dict['text_bbox'])
-            result_dict['record_id'] = os.path.split(filename)[1].split('.')[0]
+        result_dict['record_id'] = os.path.split(filename)[1].split('.')[0]
         return result_dict
 
 if __name__=='__main__':
