@@ -563,8 +563,12 @@ def ecg_image_plot(
     rows  = int(ceil(leads/columns))
 
     if(full_mode!='None'):
-        rows+=1
-        leads+=1
+        if type(full_mode) == str:
+            rows+=1
+            leads+=1
+        if type(full_mode)==list:
+            rows+=len(full_mode)
+            leads+=len(full_mode)
     
     #Grid calibration
     #Each big grid corresponds to 0.2 seconds and 0.5 mV
@@ -679,7 +683,76 @@ def ecg_image_plot(
 
     text_bbox = []
     lead_bbox = []
+
+    x_range = np.arange(0,sample_rate*standard_values['dc_offset_length']*step + 4*step,step)
+    dc_pulse = np.ones(len(x_range))
+    dc_pulse = np.concatenate(((0,0),dc_pulse[2:-2],(0,0)))
     
+    def plot_long_lead(lead,y_off):
+        if(show_lead_name):
+            t1 = ax.text(x_gap, 
+                    y_off-lead_name_offset, 
+                    lead, 
+                    fontsize=lead_fontsize)
+            
+            if (store_text_bbox):
+                renderer1 = fig.canvas.get_renderer()
+                transf = ax.transData.inverted()
+                bb = t1.get_window_extent(renderer = fig.canvas.renderer)
+                x1 = bb.x0*resolution/fig.dpi      
+                y1 = bb.y0*resolution/fig.dpi   
+                x2 = bb.x1*resolution/fig.dpi     
+                y2 = bb.y1*resolution/fig.dpi              
+                text_bbox.append([x1, y1, x2, y2, lead])
+                
+
+        if(show_dc_pulse):
+            t1 = ax.plot(x_range + x_gap,
+                    dc_pulse + y_off-lead_name_offset + 0.8,
+                    linewidth=line_width * 1.5, 
+                    color=color_line
+                    )
+            
+            if (bbox):
+                    renderer1 = fig.canvas.get_renderer()
+                    transf = ax.transData.inverted()
+                    bb = t1[0].get_window_extent(renderer=renderer1)                                                
+                    x1, y1 = bb.x0*resolution/fig.dpi, bb.y0*resolution/fig.dpi
+                    x2, y2 = bb.x1*resolution/fig.dpi, bb.y1*resolution/fig.dpi
+        
+        dc_full_lead_offset = 0 
+        
+        if(show_dc_pulse):
+            dc_full_lead_offset = sample_rate*standard_values['dc_offset_length']*step
+        
+        t1 = ax.plot(np.arange(0,len(ecg['full'+lead])*step,step) + x_gap + dc_full_lead_offset, 
+                    ecg['full'+lead] + y_off-lead_name_offset + 0.8,
+                    linewidth=line_width, 
+                    color=color_line
+                    )
+
+        if (bbox):
+            renderer1 = fig.canvas.get_renderer()
+            transf = ax.transData.inverted()
+            bb = t1[0].get_window_extent(renderer=renderer1)  
+            if show_dc_pulse == False:                                           
+                x1, y1 = bb.x0*resolution/fig.dpi, bb.y0*resolution/fig.dpi
+                x2, y2 = bb.x1*resolution/fig.dpi, bb.y1*resolution/fig.dpi
+            else:
+                y1 = min(y1, bb.y0*resolution/fig.dpi)
+                y2 = max(y2, bb.y1*resolution/fig.dpi)
+                x2 = bb.x1*resolution/fig.dpi
+
+            lead_bbox.append([x1, y1, x2, y2, 1])    
+    #Plotting longest lead for 12 seconds
+    
+    if(full_mode!='None'):
+       if type(full_mode)==str:
+        plot_long_lead(full_mode,y_offset)
+       if type(full_mode)==list:
+        for item in full_mode:
+            plot_long_lead(item,y_offset)
+            y_offset+=row_height
     for i in np.arange(len(lead_index)):
         if len(lead_index) == 12:
             leadName = leadNames_12[i]
@@ -771,62 +844,6 @@ def ecg_image_plot(
             lead_bbox.append([x1, y1, x2, y2, 0])
         
     #Plotting longest lead for 12 seconds
-    if(full_mode!='None'):
-        if(show_lead_name):
-            t1 = ax.text(x_gap, 
-                    row_height/2-lead_name_offset, 
-                    full_mode, 
-                    fontsize=lead_fontsize)
-            
-            if (store_text_bbox):
-                renderer1 = fig.canvas.get_renderer()
-                transf = ax.transData.inverted()
-                bb = t1.get_window_extent(renderer = fig.canvas.renderer)
-                x1 = bb.x0*resolution/fig.dpi      
-                y1 = bb.y0*resolution/fig.dpi   
-                x2 = bb.x1*resolution/fig.dpi     
-                y2 = bb.y1*resolution/fig.dpi              
-                text_bbox.append([x1, y1, x2, y2, full_mode])
-                
-
-        if(show_dc_pulse):
-            t1 = ax.plot(x_range + x_gap,
-                    dc_pulse + row_height/2-lead_name_offset + 0.8,
-                    linewidth=line_width * 1.5, 
-                    color=color_line
-                    )
-            
-            if (bbox):
-                    renderer1 = fig.canvas.get_renderer()
-                    transf = ax.transData.inverted()
-                    bb = t1[0].get_window_extent()                                                
-                    x1, y1 = bb.x0*resolution/fig.dpi, bb.y0*resolution/fig.dpi
-                    x2, y2 = bb.x1*resolution/fig.dpi, bb.y1*resolution/fig.dpi
-        
-        dc_full_lead_offset = 0 
-        if(show_dc_pulse):
-            dc_full_lead_offset = sample_rate*standard_values['dc_offset_length']*step
-        
-        t1 = ax.plot(np.arange(0,len(ecg['full'+full_mode])*step,step) + x_gap + dc_full_lead_offset, 
-                    ecg['full'+full_mode] + row_height/2-lead_name_offset + 0.8,
-                    linewidth=line_width, 
-                    color=color_line
-                    )
-
-        if (bbox):
-            renderer1 = fig.canvas.get_renderer()
-            transf = ax.transData.inverted()
-            bb = t1[0].get_window_extent()  
-            if show_dc_pulse == False:                                           
-                x1, y1 = bb.x0*resolution/fig.dpi, bb.y0*resolution/fig.dpi
-                x2, y2 = bb.x1*resolution/fig.dpi, bb.y1*resolution/fig.dpi
-            else:
-                y1 = min(y1, bb.y0*resolution/fig.dpi)
-                y2 = max(y2, bb.y1*resolution/fig.dpi)
-                x2 = bb.x1*resolution/fig.dpi
-
-            lead_bbox.append([x1, y1, x2, y2, 1])
-    
     
     #printed template file
     if print_txt:
@@ -883,39 +900,53 @@ def ecg_image_plot(
         
 
     if(store_text_bbox):
-        text_bbox_dict = {}       
+        text_bbox_dict = {}
+        longs = []
+        if type(full_mode)==str:
+            longs.append(full_mode)
+        if type(full_mode)==list:
+            longs+=full_mode
         for i, l in enumerate(text_bbox):
             if pad_inches!=0:
                 l[0] += left
                 l[2] += left
                 l[1] += top
                 l[3] += top
-            if not l[4] in text_bbox_dict.keys():    
-                text_bbox_dict[l[4]] = l[:-1]
-            else:
+            if l[4] in longs:    
                 text_bbox_dict[l[4]+'_long'] = l[:-1]
+                longs.remove(l[4])
+            else:
+                text_bbox_dict[l[4]] = l[:-1]
     
 
 
                
     if(bbox):
         lead_bbox_dict = {}
-        for i, l in enumerate(lead_bbox):
-            
-            leads = set()
+        for i, l in enumerate([i for i in lead_bbox if i[-1]!=1]):
             if pad_inches!=0:
                 l[0] += left
                 l[2] += left
                 l[1] += top
                 l[3] += top
-            if i<len(lead_index):
-                if not lead_index[i] in leads:
-                    leads.add(lead_index[i])
-                    lead_bbox_dict[lead_index[i]] = l[:-1]
-                else:
-                    lead_bbox_dict[lead_index[i]+'_long'] = l[:-1]
-            else:
-                lead_bbox_dict[full_mode+'_long'] = l[:-1]
+            lead_bbox_dict[leadNames_12[i]] = l[:-1]
+        for i,l in enumerate([i for i in lead_bbox if i[-1]==1]):
+                if type(full_mode)==str:
+                    if pad_inches!=0:
+                        l[0] += left
+                        l[2] += left
+                        l[1] += top
+                        l[3] += top
+                    lead_bbox_dict[full_mode+'_long'] = l[:-1]
+                elif type(full_mode)==list:
+                    if pad_inches!=0:
+                        l[0] += left
+                        l[2] += left
+                        l[1] += top
+                        l[3] += top
+                    lead_bbox_dict[full_mode[i]+'_long'] = l[:-1]
+
+            
 
     return_dict = {'image':img}
 

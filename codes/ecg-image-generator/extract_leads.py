@@ -207,11 +207,17 @@ def get_image_ecg(input_file,header_file, add_dc_pulse,add_bw,show_grid,add_prin
         if(columns==-1):
             columns = 1
     elif(len(full_leads)==12):
-        
-        if full_mode not in full_leads:
-            full_mode = full_leads[0]
-        else:
-            full_mode = full_mode
+        if type(full_mode)==str:
+            if full_mode not in full_leads:
+                full_mode = full_leads[0]
+            else:
+                full_mode = full_mode
+        if type(full_mode)==list:
+            new_full_mode = []
+            for item in full_mode:
+                if item in full_leads:
+                    new_full_mode.append(item)
+            full_mode = new_full_mode
         if(columns==-1):
             columns = 4
     else:
@@ -246,16 +252,31 @@ def get_image_ecg(input_file,header_file, add_dc_pulse,add_bw,show_grid,add_prin
                 else:
                     end = start + int(rate*lead_length_in_seconds)
 
-                    if(key!='full'+full_mode):
+                    if type(full_mode)==str:
+                        if(key!='full'+full_mode):
+                            frame[key] = samples_to_volts(record_dict[key][start:end],adc[gain_index])
+                            frame[key] = center_function(frame[key])
+                        if(full_mode!='None' and key==full_mode):
+                            if(len(record_dict[key][start:])>int(rate*10)):
+                                frame['full'+full_mode] = samples_to_volts(record_dict[key][start:(start+int(rate)*10)],adc[gain_index])
+                                frame['full'+full_mode] = center_function(frame['full'+full_mode])
+                            else:
+                                frame['full'+full_mode] = samples_to_volts(record_dict[key][start:],adc[gain_index])
+                                frame['full'+full_mode] = center_function(frame['full'+full_mode])
+                    elif type(full_mode)==list:
                         frame[key] = samples_to_volts(record_dict[key][start:end],adc[gain_index])
                         frame[key] = center_function(frame[key])
-                    if(full_mode!='None' and key==full_mode):
-                        if(len(record_dict[key][start:])>int(rate*10)):
-                            frame['full'+full_mode] = samples_to_volts(record_dict[key][start:(start+int(rate)*10)],adc[gain_index])
-                            frame['full'+full_mode] = center_function(frame['full'+full_mode])
-                        else:
-                            frame['full'+full_mode] = samples_to_volts(record_dict[key][start:],adc[gain_index])
-                            frame['full'+full_mode] = center_function(frame['full'+full_mode])
+                        for fm in full_mode:
+                            if key==fm:
+                                if(len(record_dict[key][start:])>int(rate*10)):
+                                    frame['full'+fm] = samples_to_volts(record_dict[key][start:(start+int(rate)*10)],adc[gain_index])
+                                    frame['full'+fm] = center_function(frame['full'+fm])
+                                else:
+                                    frame['full'+fm] = samples_to_volts(record_dict[key][start:],adc[gain_index])
+                                    frame['full'+fm] = center_function(frame['full'+fm])
+                                break
+                        
+                           
                     gain_index += 1
         
 

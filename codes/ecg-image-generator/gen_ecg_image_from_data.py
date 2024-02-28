@@ -9,6 +9,7 @@ from HandwrittenText.generate import get_handwritten
 from CreasesWrinkles.creases import get_creased
 from ImageAugmentation.augment import get_augment
 import warnings
+import matplotlib as plt
 
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
@@ -306,4 +307,6 @@ if __name__=='__main__':
     args['input_file'] = input_file
     args['header_file'] = header_file
     result_dict = run_single_image(args)
-    record = physionet_record(img_arr = result_dict['image'], label_dict = {'leads':result_dict['lead_bbox'],'text':result_dict['text_bbox']})
+    record = physionet_record(img_arr = result_dict['image'],record_id='06001_lr', label_dict = {'leads':result_dict['lead_bbox'],'text':result_dict['text_bbox']})
+    record.flip_cordinates('y')
+    record.show()
