@@ -10,7 +10,7 @@ from helper_functions import convert_inches_to_seconds,convert_inches_to_volts,c
 from math import ceil 
 from PIL import Image
 from numpy import asarray
-from random import randint
+from random import randint, uniform
 import matplotlib.patches as patches
 import csv
 import matplotlib.patches as patches
@@ -61,6 +61,8 @@ papersize_values = {'A0' : (33.1,46.8),
 
 leadNames_12 = ["III", 'aVF', 'V3', 'V6', 'II', 'aVL', 'V2', 'V5', 'I', 'aVR', 'V1', 'V4']
 
+def get_lead_name_offset():
+    return(uniform(-0.7,0.5))
 
 def inches_to_dots(value,resolution):
     return (value * resolution)
@@ -525,7 +527,7 @@ def ecg_image_plot(
         x_grid = 0,
         standard_colours = False,
         bbox = False,
-        print_txt=False
+        print_txt=False,        
         ):
     #Inputs :
     #ecg - Dictionary of ecg signal with lead names as keys
@@ -576,7 +578,7 @@ def ecg_image_plot(
     y_grid_size = standard_values['y_grid_size']
     x_grid_size = standard_values['x_grid_size']
     grid_line_width = standard_values['grid_line_width']
-    lead_name_offset = standard_values['lead_name_offset']
+    lead_name_offset = get_lead_name_offset()
     lead_fontsize = standard_values['lead_fontsize']
 
     #Set max and min coordinates to mark grid. Offset x_max slightly (i.e by 1 column width)
@@ -689,6 +691,7 @@ def ecg_image_plot(
     dc_pulse = np.concatenate(((0,0),dc_pulse[2:-2],(0,0)))
     
     def plot_long_lead(lead,y_off):
+        
         if(show_lead_name):
             t1 = ax.text(x_gap, 
                     y_off-lead_name_offset, 
