@@ -275,7 +275,7 @@ def run_single_image(args):
             num_creases_vertically = args['num_creases_vertically'] if (args['deterministic_vertical']) else random.choice(range(1,args['num_creases_vertically']+1))
             num_creases_horizontally = args['num_creases_horizontally'] if (args['deterministic_horizontal']) else random.choice(range(1,args['num_creases_horizontally']+1))
             image = get_creased(image=image,ifWrinkles=ifWrinkles,ifCreases=ifCreases,crease_angle=crease_angle,num_creases_vertically=num_creases_vertically,num_creases_horizontally=num_creases_horizontally,bbox = args['bbox'])
-
+        result_dict['image'] = image
         if(augment):
             noise = args['noise'] if (args['deterministic_noise']) else random.choice(range(1,args['noise']+1))
         
@@ -300,13 +300,13 @@ def run_single_image(args):
 
 if __name__=='__main__':
     from Dataset_Utils.physionet_dataset import *
-    input_file =r"G:\My Drive\DataScience\physionet2024\dataset\ptb-xl\records100\06000\06001_lr.dat"
-    header_file = r"G:\My Drive\DataScience\physionet2024\dataset\ptb-xl\records100\06000\06001_lr.hea"
+    input_file =r"C:\Users\M310695\OneDrive - Mayo Clinic\DataScience\physionet2024\ptb-xl-a-large-publicly-available-electrocardiography-dataset-1.0.3\records100\05000\05000_lr.dat"
+    header_file = input_file.replace('.dat','.hea')
     with open("config.json",'r') as f:
         args = json.load(f)
     args['input_file'] = input_file
     args['header_file'] = header_file
     result_dict = run_single_image(args)
-    record = physionet_record(img_arr = result_dict['image'],record_id='06001_lr', label_dict = {'leads':result_dict['lead_bbox'],'text':result_dict['text_bbox']})
+    record = physionet_record(img_arr = result_dict['image'],record_id='05000_lr', label_dict = {'leads':result_dict['lead_bbox'],'text':result_dict['text_bbox']})
     record.flip_cordinates('y')
-    record.show()
+    record.save_image(r"C:\Users\M310695\Desktop\temp")
