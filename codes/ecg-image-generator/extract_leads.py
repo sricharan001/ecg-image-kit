@@ -188,10 +188,10 @@ def get_image_ecg(input_file,header_file, add_dc_pulse,add_bw,show_grid,add_prin
    
 
     # Update the header file
-    full_lines = full_header.split('\n')
+    #full_lines = full_header.split('\n')
 
     # For the first line, update the number of leads.
-    _ , tail = os.path.split(full_header_file)
+    #_ , tail = os.path.split(full_header_file)
 
     #Load the full-lead recording file, extract the lead data, and save the reduced-lead recording file.
     recording = load_recording(full_recording_file, full_header,key)
@@ -293,16 +293,29 @@ def get_image_ecg(input_file,header_file, add_dc_pulse,add_bw,show_grid,add_prin
                 else:
                     end = start + int(rate*lead_length_in_seconds)
 
-                    if(key!='full'+full_mode):
+                    if type(full_mode)==str:
+                        if(key!='full'+full_mode):
+                            frame[key] = samples_to_volts(record_dict[key][start:end],adc[gain_index])
+                            frame[key] = center_function(frame[key])
+                        if(full_mode!='None' and key==full_mode):
+                            if(len(record_dict[key][start:])>int(rate*10)):
+                                frame['full'+full_mode] = samples_to_volts(record_dict[key][start:(start+int(rate)*10)],adc[gain_index])
+                                frame['full'+full_mode] = center_function(frame['full'+full_mode])
+                            else:
+                                frame['full'+full_mode] = samples_to_volts(record_dict[key][start:],adc[gain_index])
+                                frame['full'+full_mode] = center_function(frame['full'+full_mode])
+                    elif type(full_mode)==list:
                         frame[key] = samples_to_volts(record_dict[key][start:end],adc[gain_index])
                         frame[key] = center_function(frame[key])
-                    if(full_mode!='None' and key==full_mode):
-                        if(len(record_dict[key][start:])>int(rate*10)):
-                            frame['full'+full_mode] = samples_to_volts(record_dict[key][start:(start+int(rate)*10)],adc[gain_index])
-                            frame['full'+full_mode] = center_function(frame['full'+full_mode])
-                        else:
-                            frame['full'+full_mode] = samples_to_volts(record_dict[key][start:],adc[gain_index])
-                            frame['full'+full_mode] = center_function(frame['full'+full_mode])
+                        for fm in full_mode:
+                            if key==fm:
+                                if(len(record_dict[key][start:])>int(rate*10)):
+                                    frame['full'+fm] = samples_to_volts(record_dict[key][start:(start+int(rate)*10)],adc[gain_index])
+                                    frame['full'+fm] = center_function(frame['full'+fm])
+                                else:
+                                    frame['full'+fm] = samples_to_volts(record_dict[key][start:],adc[gain_index])
+                                    frame['full'+fm] = center_function(frame['full'+fm])
+                                break
                     gain_index += 1
             if(end_flag==False):
                 start += int(rate*next_lead_step)
