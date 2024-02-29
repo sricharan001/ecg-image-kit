@@ -1,7 +1,7 @@
 {
     "input_file":"",
     "header_file":"",
-    "resolution":100,
+    "resolution":200,
     "random_resolution":false,
     "pad_inches":1,
     "random_padding":true,
@@ -15,7 +15,7 @@
     "standard_grid_color":5,
     "start_index":0,
     "store_config":false,
-    "full_mode":["AVL","V5"],
+    "full_mode":["aVL","V5"],
     "seed":20,
     "num_columns":-1,
     "fully_random":false,
