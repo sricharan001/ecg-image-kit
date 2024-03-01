@@ -1,7 +1,7 @@
 {
     "input_file":"",
     "header_file":"",
-    "resolution":200,
+    "resolution":150,
     "random_resolution":false,
     "pad_inches":1,
     "random_padding":true,

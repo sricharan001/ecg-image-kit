@@ -309,4 +309,5 @@ if __name__=='__main__':
     result_dict = run_single_image(args)
     record = physionet_record(img_arr = result_dict['image'],record_id='05000_lr', label_dict = {'leads':result_dict['lead_bbox'],'text':result_dict['text_bbox']})
     record.flip_cordinates('y')
-    record.save_image(r"C:\Users\M310695\Desktop\temp")
+    record.trim_labels(0.90,'x','max')
+    record.save_image(r"C:\Users\M310695\Desktop\temp", leads=True)
