@@ -592,8 +592,7 @@ def ecg_image_plot(
     
     y_grid = standard_values['y_grid_inch'] 
     x_grid = standard_values['x_grid_inch']
-    y_grid_dots = y_grid*resolution
-    x_grid_dots = x_grid*resolution
+
  
     #row_height = height * y_grid_size/(y_grid*(rows+2))
     row_height = (height * y_grid_size/y_grid)/(rows+2)
@@ -604,7 +603,7 @@ def ecg_image_plot(
     y_max = height * y_grid_size/y_grid
 
     #Set figure and subplot sizes
-    fig, ax = plt.subplots(figsize=(width, height))
+    fig, ax = plt.subplots(figsize=(width, height), dpi=resolution)
    
     fig.subplots_adjust(
         hspace = 0, 
