@@ -18,3 +18,4 @@ validators==0.18.2
 wfdb==3.4.1
 matplotlib
 html5lib==1.1
+dill
