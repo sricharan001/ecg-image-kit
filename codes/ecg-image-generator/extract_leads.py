@@ -208,7 +208,7 @@ def get_image_ecg(input_file,header_file, add_dc_pulse,add_bw,show_grid,add_prin
             columns = 1
     elif(len(full_leads)==12):
         if type(full_mode)==str:
-            if full_mode not in full_leads:
+            if (full_mode not in full_leads and full_mode != 'None'):
                 full_mode = full_leads[0]
             else:
                 full_mode = full_mode
@@ -251,8 +251,9 @@ def get_image_ecg(input_file,header_file, add_dc_pulse,add_bw,show_grid,add_prin
                     pass
                 else:
                     end = start + int(rate*lead_length_in_seconds)
-
-                    if type(full_mode)==str:
+                    if type(full_mode) == np.str_:
+                        full_mode = str(full_mode)
+                    if type(full_mode)==str :
                         if(key!='full'+full_mode):
                             frame[key] = samples_to_volts(record_dict[key][start:end],adc[gain_index])
                             frame[key] = center_function(frame[key])
