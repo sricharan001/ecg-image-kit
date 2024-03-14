@@ -229,7 +229,8 @@ def get_image_ecg(input_file,header_file, add_dc_pulse,add_bw,show_grid,add_prin
        recording = np.transpose(recording)
 
     if recording.shape[1]/rate < 10:
-        return []
+       # return []
+        pass
 
     record_dict = create_signal_dictionary(recording,full_leads)
    

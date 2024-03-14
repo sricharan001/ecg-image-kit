@@ -2,11 +2,12 @@
     "input_file":"",
     "header_file":"",
     "resolution":100,
+    "out_image_size":[1280,1280],
     "random_resolution":false,
     "pad_inches":1,
     "random_padding":true,
     "deterministic_lead":"II",
-    "random_dc":0.6,
+    "random_dc":0.3,
     "random_bw":0,
     "random_grid_present":1,
     "print_header":false,
@@ -15,7 +16,7 @@
     "standard_grid_color":5,
     "start_index":0,
     "store_config":false,
-    "full_mode":["aVF","V5"],
+    "full_mode":["V5", "aVF"],
     "seed":20,
     "num_columns":-1,
     "fully_random":false,
@@ -40,4 +41,5 @@
     "crop":0,
     "rotate":25,
     "handwriting_size_factor":0.2
+    
     }
